@@ -13,8 +13,6 @@ import Data.List (inits, tails)
 import qualified Data.Char as Char
 import qualified Data.Text.Lazy as T
 
-import NLP.Hext.NaiveBayes
-
 newtype Parser s a = Parser { unParser :: StateT s Dist a }
   deriving (Functor, Applicative, Monad, MonadState s)
 
@@ -107,89 +105,3 @@ invisP p = do
 
 somewhereP :: Parser [b] a -> Parser [b] a
 somewhereP = invisP . anyOffsetP
-
-
--- * Wit
-
-keyword :: String -> Parser String String
-keyword = somewhereP . stringP'
-
-freeText :: BayesModel Bool -> Parser String String
-freeText model = do
-  txt <- invisP substringP
-  if runBayes model txt then pure txt else empty
-
-intent :: Ord a => BayesModel a -> Parser String a
-intent model = runBayes model <$> get
-
-
--- * Example
-
-newtype Person = Name String deriving (Show)
-
-data Intent
-  = Hello
-  | Tell Person String
-  deriving (Show)
-
-data IntentTag = TellTag | HelloTag deriving (Eq, Ord, Show)
-
-exFreeTextModel :: BayesModel Bool
-exFreeTextModel =
-  foldl (\m (sample, cl) -> teach (T.pack sample) cl m) emptyModel
-  [ ("to do the dishes", True)
-  , ("to go to the movies", True)
-  , ("to have a great day", True)
-  , ("to go home", True)
-  , ("to go to the movies", True)
-  , ("tell Harry", False)
-  , ("tell Adrian", False)
-  , ("tell Harry to", False)
-  , ("Harry", False)
-  , ("Adrian", False)
-  , ("tell", False)
-  , ("tell Harry", False)
-  , ("to", False)
-  , ("go", False)
-  , ("thing", False)
-  ]
-
-exIntentModel :: BayesModel IntentTag
-exIntentModel =
-  foldl (\m (sample, cl) -> teach (T.pack sample) cl m) emptyModel
-  [ ("hello", HelloTag)
-  , ("Hello", HelloTag)
-  , ("HELLO", HelloTag)
-  , ("tell Adrian to say hi", TellTag)
-  , ("tell Harry to do a thing", TellTag)
-  , ("tell Someone to go to the park", TellTag)
-  ]
-
-witExample :: Parser String (Maybe IntentTag, Maybe Person, Maybe String)
-witExample =
-  (,,) <$> optionalP (intent exIntentModel)
-       <*> optionalP (invisP (anyOffsetP personP))
-       <*> optionalP (freeText exFreeTextModel)
-
-witExampleBetter :: Parser String Intent
-witExampleBetter = do
-  int <- intent exIntentModel
-  case int of
-    HelloTag -> pure Hello
-    TellTag -> Tell <$> invisP (anyOffsetP personP)
-                    <*> freeText exFreeTextModel
-
-personP :: Parser String Person
-personP = do
-  x <- satisfyP (`elem` ['A'..'Z'])
-  xs <- manyP $ satisfyP (/= ' ')
-  return $ Name (x : xs)
-
-tellP :: Parser String Intent
-tellP = uncurry Tell <$> findMatch2P personP restP <* eofP
-
-helloP :: Parser String Intent
-helloP = anyOffsetP (stringP' "hello") >> return Hello
-
-intentP :: Parser String Intent
-intentP = uniformP [tellP, helloP] <* eofP
