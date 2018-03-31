@@ -1,16 +1,24 @@
 {-# LANGUAGE DeriveFunctor #-}
 
-module Distribution where
+module Distribution
+  ( Dist
+  , runDist
+  , dist
+  , uniform
+  , weight
+  , failed
+  )
+where
 
-import Control.Lens (toListOf, _2, over)
 import Data.List (sort)
+import Control.Arrow (second)
 
 newtype Dist a = Dist' { runDist :: [(a, Rational)] } deriving (Functor, Show)
 
 dist :: [(a, Rational)] -> Dist a
 dist xs =
-  let s = sum $ toListOf (traverse._2) xs
-  in Dist' $ over (traverse._2) (* (1/s)) xs
+  let s = sum (snd <$> xs)
+  in Dist' $ second (/ s) <$> filter ((/= 0) . snd) xs
 
 instance Applicative Dist where
   pure x = dist [(x, 1)]
@@ -22,21 +30,22 @@ instance Applicative Dist where
 
 instance Monad Dist where
   return = pure
-  xM >>= f = dist $ do
-    (x, p) <- runDist xM
-    (res, q) <- runDist $ f x
-    [(res, p * q)]
+  xM >>= f = dist
+    [ (res, p * q)
+    | (x, p) <- runDist xM
+    , (res, q) <- runDist (f x)
+    ]
 
 uniform :: [Dist a] -> Dist a
-uniform as = dist $ do
-  a <- as
-  over (traverse._2) (* w) (runDist a)
-  where
-    w = 1 / fromIntegral (length as)
+uniform as =
+  let w = 1 / fromIntegral (length as)
+  in dist $ fmap (second (* w)) . runDist =<< as
 
 weight :: Rational -> Dist a -> Dist a -> Dist a
 weight w x y =
-  let modAll = over (traverse._2)
-      x' = modAll (* w) (runDist x)
-      y' = modAll (* (1 - w)) (runDist y)
+  let x' = second (* w) <$> runDist x
+      y' = second (* (1 - w)) <$> runDist y
   in dist $ x' ++ y'
+
+failed :: Dist a -> Bool
+failed = null . runDist

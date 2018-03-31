@@ -28,7 +28,6 @@ exFreeTextModel =
   , ("Harry", False)
   , ("Adrian", False)
   , ("tell", False)
-  , ("tell Harry", False)
   , ("to", False)
   , ("go", False)
   , ("thing", False)

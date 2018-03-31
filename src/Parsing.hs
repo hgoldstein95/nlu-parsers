@@ -24,9 +24,11 @@ liftParser = Parser . StateT . const
 
 instance Alternative (Parser s) where
   empty = liftParser $ dist []
-  p <|> q = get >>= \s -> liftParser $ case runParser p s of
-    Dist' [] -> runParser q s
-    res -> res
+  p <|> q = get >>= \s -> liftParser $
+    let res = runParser p s
+    in if failed res
+       then runParser q s
+       else res
 
 uniformP :: [Parser s a] -> Parser s a
 uniformP ps = get >>= \s -> liftParser . uniform $ map (`runParser` s) ps
