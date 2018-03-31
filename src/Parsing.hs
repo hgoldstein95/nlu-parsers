@@ -58,6 +58,9 @@ manyP p = go
     go = go' <|> pure []
     go' = (:) <$> p <*> go
 
+someP :: Parser s a -> Parser s [a]
+someP p = (:) <$> p <*> manyP p
+
 eofP :: Parser [a] ()
 eofP = get >>= \case
   [] -> pure ()
