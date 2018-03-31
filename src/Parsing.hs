@@ -31,6 +31,9 @@ instance Alternative (Parser s) where
 uniformP :: [Parser s a] -> Parser s a
 uniformP ps = get >>= \s -> liftParser . uniform $ map (`runParser` s) ps
 
+reuniformP :: Parser s a -> Parser s a
+reuniformP p = get >>= \s -> liftParser . reuniform $ runParser p s
+
 weightP :: Rational -> Parser s a -> Parser s a -> Parser s a
 weightP w p q = get >>= \s ->
   liftParser $ weight w (runParser p s) (runParser q s)

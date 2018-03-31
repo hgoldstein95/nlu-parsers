@@ -5,6 +5,7 @@ module Distribution
   , runDist
   , dist
   , uniform
+  , reuniform
   , weight
   , failed
   )
@@ -39,6 +40,9 @@ uniform :: [Dist a] -> Dist a
 uniform as =
   let w = 1 / fromIntegral (length as)
   in dist $ fmap (second (* w)) . runDist =<< as
+
+reuniform :: Dist a -> Dist a
+reuniform d = dist $ second (const 1) <$> runDist d
 
 weight :: Rational -> Dist a -> Dist a -> Dist a
 weight w x y =
