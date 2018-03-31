@@ -10,7 +10,6 @@ module Distribution
   )
 where
 
-import Data.List (sort)
 import Control.Arrow (second)
 
 newtype Dist a = Dist' { runDist :: [(a, Rational)] } deriving (Functor, Show)

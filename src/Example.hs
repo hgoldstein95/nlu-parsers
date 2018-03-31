@@ -2,8 +2,6 @@ module Example where
 
 import Parsing
 import Wit
-import NLP.Hext.NaiveBayes
-import qualified Data.Text.Lazy as T
 
 newtype Person = Name String deriving (Show)
 
@@ -14,9 +12,9 @@ data Intent
 
 data IntentTag = TellTag | HelloTag deriving (Eq, Ord, Show)
 
-exFreeTextModel :: BayesModel Bool
+exFreeTextModel :: WitModel Bool
 exFreeTextModel =
-  foldl (\m (sample, cl) -> teach (T.pack sample) cl m) emptyModel
+  trainWitModel
   [ ("to do the dishes", True)
   , ("to go to the movies", True)
   , ("to have a great day", True)
@@ -33,9 +31,9 @@ exFreeTextModel =
   , ("thing", False)
   ]
 
-exIntentModel :: BayesModel IntentTag
+exIntentModel :: WitModel IntentTag
 exIntentModel =
-  foldl (\m (sample, cl) -> teach (T.pack sample) cl m) emptyModel
+  trainWitModel
   [ ("hello", HelloTag)
   , ("Hello", HelloTag)
   , ("HELLO", HelloTag)

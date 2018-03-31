@@ -5,13 +5,11 @@
 module Parsing where
 
 import Distribution
+
 import Control.Monad.State
 import Control.Applicative
-
-import Control.Monad (foldM)
 import Data.List (inits, tails)
 import qualified Data.Char as Char
-import qualified Data.Text.Lazy as T
 
 newtype Parser s a = Parser { unParser :: StateT s Dist a }
   deriving (Functor, Applicative, Monad, MonadState s)

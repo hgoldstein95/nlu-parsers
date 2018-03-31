@@ -1,9 +1,17 @@
 module Wit where
 
 import Parsing
-import NLP.Hext.NaiveBayes
+
 import Control.Monad.State
 import Control.Applicative
+import qualified Data.Text.Lazy as T
+
+import NLP.Hext.NaiveBayes
+
+type WitModel = BayesModel
+
+trainWitModel :: Ord a => [(String, a)] -> WitModel a
+trainWitModel = foldl (\m (sample, cl) -> teach (T.pack sample) cl m) emptyModel
 
 keyword :: String -> Parser String String
 keyword = somewhereP . stringP'
