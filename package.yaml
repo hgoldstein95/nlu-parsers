@@ -1,10 +1,10 @@
 name:                nlu-parsers
 version:             0.1.0.0
-github:              "githubuser/nlu-parsers"
+github:              "hgoldstein95/nlu-parsers"
 license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2018 Author name here"
+author:              "Harrison Goldstein"
+maintainer:          "hgoldstein95@gmail.com"
+copyright:           "2018 Harrison Goldstein"
 
 extra-source-files:
 - README.md
@@ -21,7 +21,6 @@ description:         Please see the README on Github at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
-- lens
 - hext
 - mtl
 - text
