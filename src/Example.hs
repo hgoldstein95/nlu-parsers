@@ -1,5 +1,7 @@
 module Example where
 
+import Control.Applicative (many)
+
 import Parsing
 import Wit
 
@@ -59,7 +61,7 @@ witExampleBetter = do
 personP :: Parser String Person
 personP = do
   x <- satisfyP (`elem` ['A'..'Z'])
-  xs <- manyP $ satisfyP (/= ' ')
+  xs <- many $ satisfyP (/= ' ')
   return $ Name (x : xs)
 
 tellP :: Parser String Intent
