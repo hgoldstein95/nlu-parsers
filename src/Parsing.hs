@@ -18,6 +18,9 @@ module Parsing (
   , noCollapseReuniformP
   , weightP
   -- * Standard Parser Combinators
+  --
+  -- | Usage and documentation for most of these kinds of combinators can be
+  -- found in libraries like @Text.Parsec@ and @Text.ParserCombinators.ReadP@.
   , satisfyP
   , charP
   , charP'
@@ -44,7 +47,8 @@ import qualified Data.Char as Char
 import Distribution
 
 -- | The parser type. This is similar to the construction used by libraries like
--- 'Parsec', but it produces a probability distribution of results.
+-- 'Parsec', but it produces a probability distribution of results. There is
+-- also no built-in error handling or position tracking.
 newtype Parser s a = Parser { unParser :: StateT s Dist a }
   deriving (Functor, Applicative, Monad, MonadState s)
 
@@ -102,6 +106,8 @@ reuniformP p = get >>= \s -> liftParser . reuniform . collapse $ runParser p s
 noCollapseReuniformP :: Parser s a -> Parser s a
 noCollapseReuniformP p = get >>= \s -> liftParser . reuniform $ runParser p s
 
+-- | Weights two parsers using 'weight'. Allows for arbitrary choice of
+-- importance of combined parsers.
 weightP :: Rational -> Parser s a -> Parser s a -> Parser s a
 weightP w p q = get >>= \s ->
   liftParser $ weight w (runParser p s) (runParser q s)
@@ -114,12 +120,14 @@ satisfyP f = get >>= \case
 charP :: Eq a => a -> Parser [a] a
 charP c = satisfyP (== c)
 
+-- | Case-insensitive.
 charP' :: Char -> Parser String Char
 charP' c = satisfyP (\x -> x == Char.toUpper c || x == Char.toLower c)
 
 stringP :: Eq a => [a] -> Parser [a] [a]
 stringP = foldr (\c -> (<*>) ((:) <$> charP c)) (pure [])
 
+-- | Case-insensitive.
 stringP' :: String -> Parser String String
 stringP' = foldr (\c -> (<*>) ((:) <$> charP' c)) (pure [])
 
@@ -131,6 +139,13 @@ eofP = get >>= \case
 optionalP :: Parser s a -> Parser s (Maybe a)
 optionalP p = Just <$> p <|> pure Nothing
 
+-- | Produces a uniform distribution of outcomes in which every amount of
+-- leftover input has been consumed.
+--
+-- For example:
+--
+-- >>> consumeP `runParser` "abc"
+-- [(((), "abc"), 1 % 4), (((), "bc"), 1 % 4), (((), "c"), 1 % 4), (((), ""), 1 % 4)]
 consumeP :: Parser [a] ()
 consumeP = do
   s <- get
@@ -139,6 +154,15 @@ consumeP = do
   where
     parts xs = zip (inits xs) (tails xs)
 
+-- | Produces a uniform distribution over possible substrings of the input. The
+-- remainder becomes whatever immediately follows the substring.
+--
+-- This parser can be used to try all substrings uniformly, and is best used
+-- when followed by a parser that usually fails.
+--
+-- >>> let isHello x = if x == "hello" then pure "hello" else empty
+-- >>> (substringP >>= isHello) `runParser` "well hello there"
+-- [(("hello"," there"),1 % 1)]
 substringP :: Parser [a] [a]
 substringP = do
   s <- get
@@ -152,15 +176,25 @@ substringP = do
       , (y, z) <- zip (inits ys) (tails ys)
       ]
 
+-- | Runs a given parser at all possible offsets.
 anyOffsetP :: Parser [b] a -> Parser [b] a
 anyOffsetP p = consumeP >> p
 
+-- | Consumes the rest of the input and returns it.
 restP :: Parser [a] [a]
 restP = get <* put []
 
+-- | Matches two parsers, in order, anywhere in the string.
+--
+-- For example:
+--
+-- >>> findMatch2P (stringP "hello") (stringP "world") `runParser` "foo hello bar world baz"
+-- [((("hello", "world"), " baz"), 1 % 1)]
 findMatch2P :: Parser [c] a -> Parser [c] b -> Parser [c] (a, b)
 findMatch2P p q = (,) <$> anyOffsetP p <*> anyOffsetP q
 
+-- | Makes a parser's effect on the state invisible. Results are gathered, but
+-- no input is read.
 invisP :: Parser s a -> Parser s a
 invisP p = do
   s <- get
@@ -168,5 +202,7 @@ invisP p = do
   put s
   pure x
 
+-- | Same as 'anyOffsetP', but does not consume input. This is provided as a
+-- convenience, as many NLU tasks can be phrased in terms of "find X somewhere".
 somewhereP :: Parser [b] a -> Parser [b] a
 somewhereP = invisP . anyOffsetP
