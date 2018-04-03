@@ -29,7 +29,7 @@ instance Alternative (Parser s) where
        else res
 
 uniformP :: [Parser s a] -> Parser s a
-uniformP ps = get >>= \s -> liftParser . uniform $ map (`runParser` s) ps
+uniformP ps = get >>= \s -> liftParser . flatten $ map (`runParser` s) ps
 
 reuniformP :: Parser s a -> Parser s a
 reuniformP p = get >>= \s -> liftParser . reuniform $ runParser p s
