@@ -2,7 +2,7 @@
 The core functionality of <https://wit.ai Wit.ai>, implemented in terms of
 'Parser' and its associated combinators.
 -}
-module Wit (
+module Text.NLUParse.Wit (
   -- * Wit Model
     WitModel
   , trainWitModel
@@ -13,7 +13,7 @@ module Wit (
   )
 where
 
-import Parsing
+import Text.NLUParse
 
 import Control.Monad.State
 import Control.Applicative

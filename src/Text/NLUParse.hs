@@ -7,7 +7,7 @@ We provide a probabilistic parsing framework, as well as a number of useful
 parser combinators. Our hope is to provide all of the basic combinators that one
 would need to replicate a standard NLU system. See 'Wit' for an example.
 -}
-module Parsing (
+module Text.NLUParse (
   -- * Parser
     Parser(..)
   , runParser
@@ -44,7 +44,7 @@ import Control.Applicative
 import Data.List (inits, tails)
 import qualified Data.Char as Char
 
-import Distribution
+import Data.NLUParse.Distribution
 
 -- | The parser type. This is similar to the construction used by libraries like
 -- 'Parsec', but it produces a probability distribution of results. There is

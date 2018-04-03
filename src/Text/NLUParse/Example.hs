@@ -1,9 +1,9 @@
-module Example where
+module Text.NLUParse.Example where
 
 import Control.Applicative (many)
 
-import Parsing
-import Wit
+import Text.NLUParse
+import Text.NLUParse.Wit
 
 newtype Person = Name String deriving (Show)
 

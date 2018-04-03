@@ -6,7 +6,7 @@ This module provides a monadic interface for dealing with multinomial
 distributions and failure. The 'Dist' monad captures the idea of partial
 computations with probabilistic dependencies
 -}
-module Distribution (
+module Data.NLUParse.Distribution (
   -- * Dist
     Dist
   , runDist
