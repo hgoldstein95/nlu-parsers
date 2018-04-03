@@ -6,10 +6,12 @@ This module provides a monadic interface for dealing with multinomial
 distributions and failure. The 'Dist' monad captures the idea of partial
 computations with probabilistic dependencies
 -}
-module Distribution
-  ( Dist
+module Distribution (
+  -- * Dist
+    Dist
   , runDist
   , dist
+  -- * Distribution Combinators
   , failed
   , collapse
   , uniform
@@ -53,16 +55,12 @@ dist xs =
 -- | Collapses equal elements in a distribution. While it is not technically
 -- incorrect to have a distribution like,
 --
--- @
--- [("hello", 1 % 2), ("world", 1 % 4), ("hello", 1 % 4)]
--- @
+-- > [("hello", 1 % 2), ("world", 1 % 4), ("hello", 1 % 4)]
 --
 -- sometimes it is undesirable. Using 'collapse', we can transform the above
 -- distribution into:
 --
--- @
--- [("hello", 3 % 4), ("world", 1 % 4)]
--- @
+-- > [("hello", 3 % 4), ("world", 1 % 4)]
 collapse :: Ord a => Dist a -> Dist a
 collapse d = dist $ Map.toList $ go Map.empty (runDist d)
   where
