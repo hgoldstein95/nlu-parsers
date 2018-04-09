@@ -11,6 +11,7 @@ module Data.NLUParse.Distribution (
     Dist
   , runDist
   , dist
+  , unsafeDist
   -- * Distribution Combinators
   , failed
   , collapse
@@ -51,6 +52,16 @@ dist :: [(a, Rational)] -> Dist a
 dist xs =
   let s = sum (snd <$> xs)
   in Dist' $ second (/ s) <$> filter ((/= 0) . snd) xs
+
+-- | Builds a distribution from an association of outcomes to probabilities.
+-- This version no overhead, compared to 'dist', but does not enforce the 'Dist'
+-- invariant.
+--
+-- /Note:/ Since this version __does not__ check the 'Dist' invariant it is
+-- unsafe, and should be used with caution. Be sure to check the invariants
+-- manually before using.
+unsafeDist :: [(a, Rational)] -> Dist a
+unsafeDist = Dist'
 
 -- | Collapses equal elements in a distribution. While it is not technically
 -- incorrect to have a distribution like,
