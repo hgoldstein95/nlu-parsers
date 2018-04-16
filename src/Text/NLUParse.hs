@@ -33,6 +33,7 @@ module Text.NLUParse (
   -- * Combinatorial Parsers
   , consumeP
   , substringP
+  , phraseP
   , anyOffsetP
   , findMatch2P
   , somewhereP
@@ -175,6 +176,22 @@ substringP = do
       | (x, ys) <- zip (inits xs) (tails xs)
       , (y, z) <- zip (inits ys) (tails ys)
       ]
+
+-- | Does the same thing as 'substringP', but only breaks strings at word
+-- boundaries.
+phraseP :: Parser String String
+phraseP = do
+  s <- get
+  (_, f, rst) <- uniformP $ pure <$> (rewords <$> parts (words s))
+  put rst
+  pure f
+  where
+    parts xs =
+      [ (x, y, z)
+      | (x, ys) <- zip (inits xs) (tails xs)
+      , (y, z) <- zip (inits ys) (tails ys)
+      ]
+    rewords (xs, ys, zs) = (unwords xs, unwords ys, unwords zs)
 
 -- | Runs a given parser at all possible offsets.
 anyOffsetP :: Parser [b] a -> Parser [b] a
