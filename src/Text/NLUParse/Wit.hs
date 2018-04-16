@@ -41,7 +41,7 @@ keyword = somewhereP . stringP'
 -- /Note:/ Lots of input examples are needed to make this parser work correctly.
 freeText :: WitModel Bool -> Parser String String
 freeText model = do
-  txt <- invisP substringP
+  txt <- invisP phraseP
   if runBayes model txt then pure txt else empty
 
 -- | Considers the input as a whole and attempts to classify it into some number
