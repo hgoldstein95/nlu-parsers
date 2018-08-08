@@ -36,7 +36,7 @@ fails, that might change P[D1|A]. This case needs more work to formalize.
 ----
 
 P[D1] = P[parser1 correctly found d1]
-P[A|D1] = P[parser2 d1 correctly found A]
-P[A] = sum(d) P[parser2 d correctly found A]
+P[A|D1] = P[parser2(d1) correctly found A]
+P[A] = sum(d) P[parser2(d) correctly found A]
 
-P[D1|A] = P[parser1 correctly finds d1, given that parser2 d will correctly find A for some d] ???
+P[D1|A] = P[parser1 correctly finds d1, given that parser2(d) will correctly find A for some d] ???
