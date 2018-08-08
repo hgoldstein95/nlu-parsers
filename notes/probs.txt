@@ -32,3 +32,9 @@ There are two cases P[D1|A] might not be 1. First, it might be the case that A
 is part of both D1 and D2. Then P[D1|A] would certainly not be 1. Also, if the
 parser for A would have succeeded if run independently of D1, in a case where D1
 fails, that might change P[D1|A]. This case needs more work to formalize.
+
+----
+
+P[D1] = P[parser1 => d1]
+P[A|D1] = P[parser2 d1 => A]
+P[A] = sum(d) P[parser2 d => A] 
